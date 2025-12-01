@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use OpenAI;
 
 class ChatbotController extends Controller
@@ -37,14 +39,44 @@ class ChatbotController extends Controller
             // Inicializar cliente OpenAI
             $client = OpenAI::client($apiKey);
 
-            // Definir el system prompt (personalidad de Nokalito)
-            $systemPrompt = "Eres Nokalito, el asistente virtual de D'Nokali, una pastelería premium especializada en productos personalizados. "
-                . "Tu personalidad es amable, cálida y profesional. "
-                . "Eres experto en tortas, pasteles, productos de repostería y personalización de pedidos. "
-                . "Respondes de forma clara, concisa y útil. "
-                . "Ayudas a los clientes con información sobre productos, pedidos personalizados, sabores, tamaños, ocasiones especiales y cualquier duda sobre D'Nokali. "
-                . "Siempre mantienes un tono dulce y acogedor, como la marca que representas. "
-                . "Tus respuestas son breves (máximo 3-4 oraciones) pero muy útiles.";
+            // =====================================================
+            // LEER ARCHIVO DE CONTEXTO INTERNO
+            // =====================================================
+            $rutaContexto = 'nokalito/contexto.txt';
+            
+            if (!Storage::exists($rutaContexto)) {
+                Log::error('Archivo de contexto no encontrado: ' . $rutaContexto);
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Nokalito no está disponible en este momento. Por favor, intenta más tarde.'
+                ]);
+            }
+
+            $contenidoContexto = Storage::get($rutaContexto);
+
+            // =====================================================
+            // SYSTEM PROMPT FIJO + CONTEXTO
+            // =====================================================
+            $systemPrompt = "
+                Eres Nokalito, asistente virtual oficial de la pastelería D’Nokali.
+
+                REGLAS:
+                1. Siempre responde de manera amable y conversacional.
+                2. Para saludos o frases casuales (hola, jhola, cómo estás, etc.), responde con un saludo natural.
+                3. Para información del negocio, usa únicamente los datos del archivo de contexto.
+                4. Si el usuario pregunta algo que NO está en el contexto, responde:
+                'Esa información no está registrada, pero puedo ayudarte con nuestros productos, sabores, horarios o pedidos.'
+                5. Puedes corregir errores ortográficos leves.
+                6. No inventes datos del negocio que no existan en el contexto.
+
+                FORMATO:
+                - Respuestas cortas y claras.
+                - Si mencionas productos, usa listas simples y ordenadas.
+
+                --- INFORMACIÓN DE CONTEXTO ---
+                $contenidoContexto
+                ";
+
 
             // Generar respuesta usando GPT-4o-mini (modelo económico y rápido)
             $response = $client->chat()->create([
@@ -59,8 +91,8 @@ class ChatbotController extends Controller
                         'content' => $mensajeUsuario
                     ]
                 ],
-                'max_tokens' => 200,
-                'temperature' => 0.7,
+                'max_tokens' => 300,  // Aumentado para respuestas más completas basadas en contexto
+                'temperature' => 0.3,  // Reducido para mayor precisión y menos creatividad
             ]);
 
             // Extraer la respuesta del chatbot
@@ -75,7 +107,7 @@ class ChatbotController extends Controller
 
         } catch (\OpenAI\Exceptions\ErrorException $e) {
             // Errores específicos de OpenAI (cuota excedida, API key inválida, etc.)
-            \Log::error('Error de OpenAI en chatbot: ' . $e->getMessage());
+            Log::error('Error de OpenAI en chatbot: ' . $e->getMessage());
             
             return response()->json([
                 'status' => 'success',
@@ -84,7 +116,7 @@ class ChatbotController extends Controller
 
         } catch (\Exception $e) {
             // Otros errores generales
-            \Log::error('Error general en chatbot: ' . $e->getMessage());
+            Log::error('Error general en chatbot: ' . $e->getMessage());
             
             return response()->json([
                 'status' => 'success',
