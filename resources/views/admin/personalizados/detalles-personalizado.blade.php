@@ -33,12 +33,28 @@
         <p><strong>Tamaño:</strong> {{ $personalizado->tamano }}</p>
         <p><strong>Sabor:</strong> {{ $personalizado->sabor }}</p>
 
-        @if($personalizado->imagen_referencia)
-        <div class="text-center my-4">
-            <img src="{{ asset('storage/' . $personalizado->imagen_referencia) }}" 
-                 class="img-fluid rounded-4 shadow-sm"
-                 style="max-height: 300px; object-fit: cover;">
-        </div>
+        {{-- IMAGEN: Prioridad a imagen generada con IA --}}
+        @if($personalizado->imagen_ia)
+            <div class="text-center my-4">
+                <h6 class="fw-semibold text-brown mb-2">
+                    <i class="bi bi-stars me-1" style="color: #9b7bdb;"></i>Imagen Generada con IA
+                </h6>
+                <img src="{{ asset('storage/' . $personalizado->imagen_ia) }}" 
+                     class="img-fluid rounded-4 shadow-sm"
+                     style="max-height: 350px; object-fit: cover;"
+                     alt="Imagen generada con IA">
+                <p class="text-muted mt-2 mb-0"><small><i class="bi bi-magic"></i> Generada con Inteligencia Artificial</small></p>
+            </div>
+        @elseif($personalizado->imagen_referencia)
+            <div class="text-center my-4">
+                <h6 class="fw-semibold text-brown mb-2">Imagen de Referencia</h6>
+                <img src="{{ asset('storage/' . $personalizado->imagen_referencia) }}" 
+                     class="img-fluid rounded-4 shadow-sm"
+                     style="max-height: 300px; object-fit: cover;"
+                     alt="Imagen de referencia">
+            </div>
+        @else
+            <p class="text-muted"><em>Sin imagen adjunta</em></p>
         @endif
 
         <hr class="my-4">

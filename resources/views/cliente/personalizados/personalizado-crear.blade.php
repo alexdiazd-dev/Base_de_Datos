@@ -212,8 +212,8 @@
                             </div>
 
                             {{-- Placeholder inicial --}}
-                            <div id="ai-placeholder" class="text-center py-5" style="background-color: #ffffff; border-radius: 1rem; border: 2px dashed #e5d9f2;">
-                                <i class="bi bi-image text-muted" style="font-size: 3rem; opacity: 0.3;"></i>
+                            <div id="ai-placeholder" class="text-center py-4" style="background-color: #ffffff; border-radius: 1rem; border: 2px dashed #e5d9f2;">
+                                <img src="{{ asset('imagenes/nokalito.jpeg') }}" alt="Nokalito - Asistente IA" class="img-fluid rounded-4 shadow-sm" style="max-height: 300px; object-fit: cover; opacity: 0.85;">
                                 <p class="text-muted mt-3 mb-0">Aún no has generado ninguna imagen.</p>
                                 <small class="text-muted">Haz clic en "Generar Imagen IA" para crear una vista previa</small>
                             </div>
