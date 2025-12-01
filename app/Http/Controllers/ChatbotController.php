@@ -64,18 +64,33 @@ class ChatbotController extends Controller
                 1. Siempre responde de manera amable y conversacional.
                 2. Para saludos o frases casuales (hola, jhola, cómo estás, etc.), responde con un saludo natural.
                 3. Para información del negocio, usa únicamente los datos del archivo de contexto.
-                4. Si el usuario pregunta algo que NO está en el contexto, responde:
-                'Esa información no está registrada, pero puedo ayudarte con nuestros productos, sabores, horarios o pedidos.'
+                4. Si el usuario pregunta algo que NO está en el contexto, responde de manera útil, educada y natural. 
+                Indica que esa información no está registrada, pero ofrece alternativas basadas en el contexto.
+                Ejemplo:
+                “No contamos con ese dato exacto, pero sí disponemos de estos sabores: …”
+
                 5. Puedes corregir errores ortográficos leves.
                 6. No inventes datos del negocio que no existan en el contexto.
 
-                FORMATO:
-                - Respuestas cortas y claras.
-                - Si mencionas productos, usa listas simples y ordenadas.
+                FORMATO DE RESPUESTA (OBLIGATORIO):
+                - NO uses Markdown (**negritas**, *, #, etc.).
+                - NO escribas todo en un solo párrafo.
+                - Cada producto debe ir EXACTAMENTE así:
+                Nombre — S/ precio (Stock: X)
+                - Cada producto en SU PROPIA LÍNEA.
+                - Entre secciones debe haber una LÍNEA EN BLANCO.
+                - No juntar textos ni pegar productos seguidos.
+                - Mantén el texto limpio, ordenado y fácil de leer en un chat pequeño.
+
+                EJEMPLO DEL FORMATO ESPERADO:
+                Producto 1 — S/ xx.xx (Stock: X)
+                Producto 2 — S/ xx.xx (Stock: X)
+                Producto 3 — S/ xx.xx (Stock: X)
 
                 --- INFORMACIÓN DE CONTEXTO ---
                 $contenidoContexto
-                ";
+            ";
+
 
 
             // Generar respuesta usando GPT-4o-mini (modelo económico y rápido)

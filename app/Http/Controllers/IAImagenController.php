@@ -228,6 +228,9 @@ Keep your DALL-E prompt detailed and focused on visual accuracy (max 500 charact
 
             Log::info('Imagen guardada exitosamente', ['file' => $fileName]);
 
+            // Guardar nombre del archivo en sesión para vincularlo con la solicitud personalizada
+            session(['imagen_ia_generada' => 'personalizados-ia/' . $fileName]);
+
             // Retornar respuesta exitosa con la URL pública de la imagen
             return response()->json([
                 'status' => 'ok',

@@ -48,11 +48,22 @@
 
 
         <!-- IMAGEN -->
-        @if($personalizado->imagen_referencia)
+        @if($personalizado->imagen_ia)
             <div class="text-center my-4">
+                <h5 class="fw-bold text-brown mb-3">Imagen Generada con IA</h5>
+                <img src="{{ asset('storage/' . $personalizado->imagen_ia) }}" 
+                     class="img-fluid rounded-4 shadow-sm"
+                     style="max-height: 400px; object-fit: cover;"
+                     alt="Imagen generada con IA">
+                <p class="text-muted mt-2"><small><i class="bi bi-magic"></i> Generada con Inteligencia Artificial</small></p>
+            </div>
+        @elseif($personalizado->imagen_referencia)
+            <div class="text-center my-4">
+                <h5 class="fw-bold text-brown mb-3">Imagen de Referencia</h5>
                 <img src="{{ asset('storage/' . $personalizado->imagen_referencia) }}" 
                      class="img-fluid rounded-4 shadow-sm"
-                     style="max-height: 350px; object-fit: cover;">
+                     style="max-height: 350px; object-fit: cover;"
+                     alt="Imagen de referencia">
             </div>
         @else
             <p class="text-muted"><em>Sin imagen de referencia</em></p>

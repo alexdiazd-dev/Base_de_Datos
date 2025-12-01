@@ -238,6 +238,9 @@ class ClienteController extends Controller
 
             $idUsuario = session('usuario_id');
 
+            // Capturar imagen generada por IA de la sesión (si existe)
+            $imagenIA = session('imagen_ia_generada');
+
             // Crear registro real en la base de datos
             $result = DB::select('CALL sp_insert_personalizacion(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
                 $idUsuario,
@@ -251,6 +254,21 @@ class ClienteController extends Controller
                 $costo,
                 'Pendiente',
             ]);
+
+            // Si se generó imagen con IA, actualizarla en el registro recién creado
+            if ($imagenIA) {
+                $ultimaPersonalizacion = Personalizacion::where('id_usuario', $idUsuario)
+                    ->orderBy('id_personalizacion', 'desc')
+                    ->first();
+                
+                if ($ultimaPersonalizacion) {
+                    $ultimaPersonalizacion->imagen_ia = $imagenIA;
+                    $ultimaPersonalizacion->save();
+                }
+                
+                // Limpiar imagen IA de la sesión
+                session()->forget('imagen_ia_generada');
+            }
 
             // Limpiar datos del formulario de la sesiA3n
             session()->forget('form_personalizado');

@@ -21,6 +21,7 @@ class Personalizacion extends Model
         'sabor',
         'ocasion',
         'imagen_referencia',
+        'imagen_ia',
         'notas_adicionales',
         'costo_estimado',
         'estado'
