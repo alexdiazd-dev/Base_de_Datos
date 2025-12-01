@@ -146,6 +146,10 @@
                         </div>
 
                         <div class="d-flex justify-content-end mt-4 gap-3">
+                            <button type="button" id="btn-generar-ia" class="btn rounded-pill px-4 py-2 shadow-sm text-white"
+                                    style="background: linear-gradient(135deg, #9b7bdb, #c8a5f0);">
+                                <i class="bi bi-stars me-2"></i><span id="btn-ia-text">Generar Imagen IA</span>
+                            </button>
                             <button type="submit" class="btn btn-lavanda rounded-pill px-4 py-2 text-white">
                                 Enviar Solicitud
                             </button>
@@ -193,6 +197,53 @@
                             </ul>
                         </div>
                     </div>
+
+                    {{-- Contenedor para imagen generada con IA --}}
+                    <div class="card border-0 shadow-sm rounded-4 mt-4">
+                        <div class="card-body p-4" style="background: linear-gradient(135deg, #f9f5ff, #fff8f5);">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <h6 class="fw-semibold text-brown mb-1">
+                                        <i class="bi bi-stars me-2" style="color: #9b7bdb;"></i>Vista generada con IA
+                                    </h6>
+                                    <small class="text-muted">Visualización con inteligencia artificial</small>
+                                </div>
+                                <span class="badge text-bg-light border">Próximamente</span>
+                            </div>
+
+                            {{-- Placeholder inicial --}}
+                            <div id="ai-placeholder" class="text-center py-5" style="background-color: #ffffff; border-radius: 1rem; border: 2px dashed #e5d9f2;">
+                                <i class="bi bi-image text-muted" style="font-size: 3rem; opacity: 0.3;"></i>
+                                <p class="text-muted mt-3 mb-0">Aún no has generado ninguna imagen.</p>
+                                <small class="text-muted">Haz clic en "Generar Imagen IA" para crear una vista previa</small>
+                            </div>
+
+                            {{-- Estado de carga --}}
+                            <div id="ai-loading" class="d-none text-center py-5" style="background-color: #ffffff; border-radius: 1rem; border: 2px solid #e5d9f2;">
+                                <div class="spinner-border text-primary mb-3" role="status" style="color: #9b7bdb !important;">
+                                    <span class="visually-hidden">Generando...</span>
+                                </div>
+                                <p class="text-muted mb-0 fw-semibold">Generando imagen con IA...</p>
+                                <small class="text-muted">Esto puede tomar unos segundos</small>
+                            </div>
+
+                            {{-- Contenedor para la imagen generada (oculto inicialmente) --}}
+                            <div id="ai-image-container" class="d-none">
+                                <img id="ai-generated-image" src="" alt="Imagen generada por IA" class="img-fluid rounded-4 shadow-sm" style="max-height: 400px; object-fit: cover;">
+                                <p class="text-center text-muted mt-2 mb-0 small">
+                                    <i class="bi bi-stars" style="color: #9b7bdb;"></i> Imagen generada con IA (demo)
+                                </p>
+                            </div>
+
+                            {{-- Mensaje de error --}}
+                            <div id="ai-error" class="d-none text-center py-5" style="background-color: #fff5f5; border-radius: 1rem; border: 2px dashed #f8d7da;">
+                                <i class="bi bi-exclamation-triangle text-danger" style="font-size: 3rem; opacity: 0.5;"></i>
+                                <p class="text-danger mt-3 mb-0 fw-semibold">No se pudo generar la imagen</p>
+                                <small class="text-muted">Por favor, intenta nuevamente</small>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -302,6 +353,101 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     updatePreview();
+
+    // ===================================================
+    // FUNCIONALIDAD GENERAR IMAGEN IA
+    // ===================================================
+    const btnGenerarIA = document.getElementById('btn-generar-ia');
+    const btnIAText = document.getElementById('btn-ia-text');
+    const aiPlaceholder = document.getElementById('ai-placeholder');
+    const aiLoading = document.getElementById('ai-loading');
+    const aiImageContainer = document.getElementById('ai-image-container');
+    const aiGeneratedImage = document.getElementById('ai-generated-image');
+    const aiError = document.getElementById('ai-error');
+
+    if (btnGenerarIA) {
+        btnGenerarIA.addEventListener('click', async function() {
+            // Validar que los campos requeridos estén llenos
+            const descripcion = form.descripcion?.value.trim();
+            const tamano = form.tamano?.value;
+            const sabor = form.sabor?.value;
+
+            if (!descripcion || !tamano || !sabor) {
+                alert('Por favor, completa al menos la descripción, tamaño y sabor antes de generar la imagen.');
+                return;
+            }
+
+            // Deshabilitar botón y mostrar estado de carga
+            btnGenerarIA.disabled = true;
+            btnIAText.textContent = 'Generando...';
+
+            // Ocultar todos los estados
+            aiPlaceholder?.classList.add('d-none');
+            aiImageContainer?.classList.add('d-none');
+            aiError?.classList.add('d-none');
+
+            // Mostrar loading
+            aiLoading?.classList.remove('d-none');
+
+            try {
+                // Preparar datos del formulario
+                const formData = new FormData();
+                formData.append('descripcion', descripcion);
+                formData.append('tamano', tamano);
+                formData.append('sabor', sabor);
+                formData.append('ocasion', form.ocasion?.value || '');
+                formData.append('notas_adicionales', form.notas_adicionales?.value || '');
+
+                // Enviar petición al backend
+                const response = await fetch('{{ route('cliente.personalizado.generarIA') }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.status === 'ok') {
+                    // Ocultar loading
+                    aiLoading?.classList.add('d-none');
+
+                    // Mostrar imagen generada por IA
+                    if (data.image_url) {
+                        aiGeneratedImage.src = data.image_url;
+                        aiImageContainer?.classList.remove('d-none');
+                        
+                        // Actualizar texto del label
+                        const aiLabel = aiImageContainer.querySelector('p');
+                        if (aiLabel) {
+                            aiLabel.innerHTML = '<i class="bi bi-stars" style="color: #9b7bdb;"></i> Imagen generada con IA';
+                        }
+                    } else {
+                        throw new Error('No se recibió URL de imagen');
+                    }
+
+                    console.log('Imagen generada exitosamente:', data);
+                } else {
+                    throw new Error(data.message || 'Error en la respuesta del servidor');
+                }
+
+            } catch (error) {
+                console.error('Error al generar imagen:', error);
+                
+                // Ocultar loading
+                aiLoading?.classList.add('d-none');
+                
+                // Mostrar error
+                aiError?.classList.remove('d-none');
+            } finally {
+                // Rehabilitar botón
+                btnGenerarIA.disabled = false;
+                btnIAText.textContent = 'Generar Imagen IA';
+            }
+        });
+    }
 });
 </script>
 @endpush

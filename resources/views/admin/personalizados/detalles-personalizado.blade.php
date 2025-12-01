@@ -48,7 +48,7 @@
 
             <label class="fw-semibold">Estado:</label>
             <select name="estado" class="form-select rounded-pill w-50 mb-3">
-                @foreach(['Pendiente','Aprobado','Rechazado','En Producción','Entregado'] as $estado)
+                @foreach(['Pendiente','Aprobado','Rechazado','En Diseño','Entregado'] as $estado)
                     <option value="{{ $estado }}" {{ $personalizado->estado === $estado ? 'selected' : '' }}>
                         {{ $estado }}
                     </option>

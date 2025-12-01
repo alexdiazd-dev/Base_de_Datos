@@ -40,6 +40,9 @@
     <!-- CARRITO (siempre activo) -->
     <x-carrito_compras />
 
+    <!-- CHATBOT NOKALITO -->
+    <x-chatbot-nokalito />
+
     <!-- Scripts -->
     <script src="{{ asset('js/modal-producto.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

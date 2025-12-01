@@ -8,6 +8,8 @@ use App\Http\Controllers\IndexController;
 use App\Http\Controllers\CarritoController;
 use App\Http\Controllers\PasarelaController;
 use App\Http\Controllers\AdminPedidoController;
+use App\Http\Controllers\IAImagenController;
+use App\Http\Controllers\ChatbotController;
 
 
 /*
@@ -52,6 +54,10 @@ Route::prefix('cliente')->group(function () {
         ->name('cliente.personalizados.actualizar');
     Route::delete('/cliente/personalizados/{id}/eliminar', [ClienteController::class, 'eliminarPersonalizado'])
         ->name('cliente.personalizados.eliminar');
+
+    // Generar imagen con IA para personalizados
+    Route::post('/generar-imagen-ia', [IAImagenController::class, 'generarImagenIA'])
+        ->name('cliente.personalizado.generarIA');
 
     Route::get('/nosotros', function () {
         return view('cliente.nosotros');
@@ -160,4 +166,12 @@ Route::prefix('admin')->group(function () {
     Route::put('/categorias/{id}', [AdminController::class, 'updateCategoria'])->name('admin.categorias.update');
     Route::delete('/categorias/{id}', [AdminController::class, 'eliminarCategoria'])->name('admin.categorias.destroy');
 });
+
+
+// ===========================================================
+// 🤖 CHATBOT NOKALITO
+// ===========================================================
+Route::post('/chatbot-mensaje', [ChatbotController::class, 'responder'])
+    ->name('chatbot.responder');
+
 

@@ -168,24 +168,45 @@ class AdminController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function eliminarProducto($id) {
-        try {
-            $producto = Producto::findOrFail($id); // lectura
+    public function eliminarProducto($id)
+{
+    try {
+        $producto = Producto::findOrFail($id);
 
-            if ($producto->imagen) {
-                Storage::disk('public')->delete($producto->imagen);
-            }
+        // Eliminar imagen del almacenamiento
+        if ($producto->imagen) {
+            Storage::disk('public')->delete($producto->imagen);
+        }
 
-            DB::statement('CALL sp_delete_producto(?)', [$producto->id_producto]);
+        // Llamar al SP
+        DB::statement('CALL sp_delete_producto(?)', [$producto->id_producto]);
 
+        return redirect()
+            ->route('admin.productos')
+            ->with('success', 'Producto eliminado correctamente.');
+
+    } catch (\Illuminate\Database\QueryException $e) {
+
+        // Si el SP lanzó SIGNAL SQLSTATE '45000'
+        if ($e->getCode() == "45000") {
             return redirect()
                 ->route('admin.productos')
-                ->with('success', '✅ Producto eliminado correctamente.');
-        } catch (\Throwable $e) {
-            report($e);
-            throw $e;
+                ->with('error', 'No se puede eliminar este producto porque está asociado a pedidos.');
         }
+
+        // Si es error por FK (23000)
+        if ($e->getCode() == "23000") {
+            return redirect()
+                ->route('admin.productos')
+                ->with('error', 'No se puede eliminar porque tiene pedidos relacionados.');
+        }
+
+        return redirect()
+            ->route('admin.productos')
+            ->with('error', 'Error inesperado al intentar eliminar el producto.');
     }
+}
+
 
     public function personalizados() {
         try {
