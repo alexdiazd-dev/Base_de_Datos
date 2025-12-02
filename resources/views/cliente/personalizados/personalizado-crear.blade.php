@@ -212,8 +212,8 @@
                             </div>
 
                             {{-- Placeholder inicial --}}
-                            <div id="ai-placeholder" class="text-center py-5" style="background-color: #ffffff; border-radius: 1rem; border: 2px dashed #e5d9f2;">
-                                <i class="bi bi-image text-muted" style="font-size: 3rem; opacity: 0.3;"></i>
+                            <div id="ai-placeholder" class="text-center py-4" style="background-color: #ffffff; border-radius: 1rem; border: 2px dashed #e5d9f2;">
+                                <img src="{{ asset('imagenes/nokalito.jpeg') }}" alt="Nokalito - Asistente IA" class="img-fluid rounded-4 shadow-sm" style="max-height: 300px; object-fit: cover; opacity: 0.85;">
                                 <p class="text-muted mt-3 mb-0">Aún no has generado ninguna imagen.</p>
                                 <small class="text-muted">Haz clic en "Generar Imagen IA" para crear una vista previa</small>
                             </div>
@@ -398,12 +398,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 formData.append('ocasion', form.ocasion?.value || '');
                 formData.append('notas_adicionales', form.notas_adicionales?.value || '');
 
+                // Agregar imagen de referencia si el usuario la subió
+                const imagenReferenciaInput = form.querySelector('input[name="imagen_referencia"]');
+                if (imagenReferenciaInput && imagenReferenciaInput.files && imagenReferenciaInput.files[0]) {
+                    formData.append('imagen_referencia', imagenReferenciaInput.files[0]);
+                    console.log('Imagen de referencia incluida:', imagenReferenciaInput.files[0].name);
+                } else {
+                    console.log('No se seleccionó imagen de referencia');
+                }
+
                 // Enviar petición al backend
+                // IMPORTANTE: No incluir Content-Type header cuando se usa FormData
+                // El navegador lo configura automáticamente como multipart/form-data
                 const response = await fetch('{{ route('cliente.personalizado.generarIA') }}', {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
                         'Accept': 'application/json'
+                        // NO incluir 'Content-Type' - FormData lo maneja automáticamente
                     },
                     body: formData
                 });
@@ -419,16 +431,23 @@ document.addEventListener('DOMContentLoaded', () => {
                         aiGeneratedImage.src = data.image_url;
                         aiImageContainer?.classList.remove('d-none');
                         
-                        // Actualizar texto del label
+                        // Actualizar texto del label según si se usó imagen de referencia
                         const aiLabel = aiImageContainer.querySelector('p');
                         if (aiLabel) {
-                            aiLabel.innerHTML = '<i class="bi bi-stars" style="color: #9b7bdb;"></i> Imagen generada con IA';
+                            const labelTexto = data.uso_imagen_referencia 
+                                ? '<i class="bi bi-stars" style="color: #9b7bdb;"></i> Imagen generada con IA + imagen de referencia'
+                                : '<i class="bi bi-stars" style="color: #9b7bdb;"></i> Imagen generada con IA';
+                            aiLabel.innerHTML = labelTexto;
                         }
+
+                        console.log('Imagen generada exitosamente:', {
+                            url: data.image_url,
+                            uso_referencia: data.uso_imagen_referencia,
+                            prompt: data.prompt_usado
+                        });
                     } else {
                         throw new Error('No se recibió URL de imagen');
                     }
-
-                    console.log('Imagen generada exitosamente:', data);
                 } else {
                     throw new Error(data.message || 'Error en la respuesta del servidor');
                 }

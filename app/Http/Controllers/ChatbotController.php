@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use OpenAI;
 
 class ChatbotController extends Controller
@@ -68,8 +70,8 @@ Mantén siempre un tono cálido, dulce y profesional. Responde con máximo 3–4
                         'content' => $mensajeUsuario
                     ]
                 ],
-                'max_tokens' => 200,
-                'temperature' => 0.7,
+                'max_tokens' => 300,  // Aumentado para respuestas más completas basadas en contexto
+                'temperature' => 0.3,  // Reducido para mayor precisión y menos creatividad
             ]);
 
             // Extraer la respuesta del chatbot
@@ -84,7 +86,7 @@ Mantén siempre un tono cálido, dulce y profesional. Responde con máximo 3–4
 
         } catch (\OpenAI\Exceptions\ErrorException $e) {
             // Errores específicos de OpenAI (cuota excedida, API key inválida, etc.)
-            \Log::error('Error de OpenAI en chatbot: ' . $e->getMessage());
+            Log::error('Error de OpenAI en chatbot: ' . $e->getMessage());
             
             return response()->json([
                 'status' => 'success',
@@ -93,7 +95,7 @@ Mantén siempre un tono cálido, dulce y profesional. Responde con máximo 3–4
 
         } catch (\Exception $e) {
             // Otros errores generales
-            \Log::error('Error general en chatbot: ' . $e->getMessage());
+            Log::error('Error general en chatbot: ' . $e->getMessage());
             
             return response()->json([
                 'status' => 'success',
