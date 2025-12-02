@@ -175,17 +175,6 @@
                         </div>
                         <span class="badge text-bg-light border">Solo visual</span>
                     </div>
-
-                    <div class="b-preview mb-4">
-                        <div class="cake-preview size-medium">
-                            <div class="cake-shadow"></div>
-                            <div class="cake-tier tier-bottom"></div>
-                            <div class="cake-tier tier-middle"></div>
-                            <div class="cake-tier tier-top"></div>
-                            <div class="cake-plate"></div>
-                        </div>
-                    </div>
-
                     <div class="b-resumen card border-0 shadow-sm rounded-4">
                         <div class="card-body">
                             <h6 class="fw-semibold text-brown mb-3">Resumen visual</h6>
